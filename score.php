@@ -13,7 +13,7 @@
 </nav>
 
 <?php
-if (!isset($_COOKIE['logdin'])) {
+if (!isset($_COOKIE['loggedin'])) {
     header("Location: index.php");
 }
 $host = '127.0.0.1';
@@ -33,16 +33,30 @@ try {
 } catch (\PDOException $e) {
     throw new \PDOException($e->getMessage(), (int) $e->getCode());
 }
-
-//  Load beer html code from database
+// get number of id's
+$amount = 0;
+$stmt = $pdo->query('SELECT * FROM score;');
+while ($row = $stmt->fetch())
+{
+    $amount++;
+}
+//  Load score from database
 $data = $pdo->query('SELECT * FROM score')->fetch(PDO::FETCH_ASSOC);
-for ($i=1; $i < $countBeers+1; $i++) { 
+for ($i=1; $i < $amount+1; $i++) { 
     $data = $pdo->query('SELECT * FROM score WHERE id=' . $i)->fetch(PDO::FETCH_ASSOC);
     $id = $data['id'];
-    $naam = $data['Name'];
+    $naam = $data['naam'];
     $score = $data['score'];
     $updated = $data['updated'];
-} 
+    echo($naam . " heeft " . $score . " keer afgewast. Hij heeft op " . $updated . " voor het laatst afgewast </br>");
+}
+$omfg =  "'" . $_COOKIE['user'] . "'";
+
+$newscore = $pdo->query("UPDATE `score` SET `score` = score + 1 WHERE `score`.`naam` = $omfg;");
+
+
+echo($omfg);
+
 ?>
 
 

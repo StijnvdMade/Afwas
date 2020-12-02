@@ -6,7 +6,7 @@
 <?php
 
 $host = '127.0.0.1';
-$db   = 'Afwas';
+$db   = 'security';
 $user = 'root';
 $pass = '';
 $charset = 'utf8mb4';
@@ -22,17 +22,42 @@ try {
 } catch (\PDOException $e) {
     throw new \PDOException($e->getMessage(), (int) $e->getCode());
 }
-echo $pdo->query('select version()')->fetchColumn();
+// echo $pdo->query('select version()')->fetchColumn();
 
 $gebruikersnaam = $_POST['gebruikersnaam'];
 $wachtwoord = $_POST['wachtwoord'];
-$sql = "select * from security.gebruikers";
-$stnt = $pdo->prepare($sql);
-$stnt->execute();
-$array = $stnt->fetch(PDO::FETCH_OBJ);
-if ($array->gebruikersnaam == $gebruikersnaam && $array->wachtwoord == $wachtwoord) {
+$users = [];
+// get number of users
+$count = 0;
+$stmt = $pdo->query('SELECT * FROM gebruikers;');
+while ($row = $stmt->fetch())
+{
+    $count++;
+}
+$data = $pdo->query('SELECT * FROM gebruikers;')->fetch(PDO::FETCH_ASSOC);
+for ($i=1; $i < $count+1; $i++) { 
+    $data = $pdo->query('SELECT * FROM gebruikers WHERE id=' . $i)->fetch(PDO::FETCH_ASSOC);
+    $id = $data['id'];
+    $gebruikersnaamDB = $data['gebruikersnaam'];
+    $wachtwoordDB = $data['wachtwoord'];
+    array_push($users, $gebruikersnaamDB, $wachtwoordDB);
+}
+$aantalusers = count($users);
+for($x = 0; $x < $aantalusers; $x++) {
+    echo $users[$x];
+    echo "<br>";
+  }
+$number = 0;
+for ($i=1; $i < $count; $i++) { 
+    if ($users[$number] == $gebruikersnaam) {
+        echo '<h1>yes</h1>';
+    }
+    $number+2;
+}
+if ($gebruikersnaam == $gebruikersnaamDB && $wachtwoord == $wachtwoordDB) {
     echo '<h1>succes</h1>';
-    setcookie('logdin', $array->id);
+    setcookie('loggedin', $id);
+    setcookie('user',$gebruikersnaam);
 } else {
     echo '<h1>niggah you fake</h1>';
 }
